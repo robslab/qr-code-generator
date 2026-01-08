@@ -22,22 +22,14 @@
             width: 300px;
             height: 300px;
             margin: 0 auto;
-        }
-        #qr-canvas {
-            /* Fixed rounded style */
+            background: white;
             border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
         }
-        #logo-preview {
-            position: absolute;
-            /* Max size is set dynamically by JS based on user input */
-            object-fit: contain;
-            /* Default rounding and styling for the preview, overwritten by JS */
-            border-radius: 8px; 
-            background-color: white; 
-            padding: 4px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            display: none; 
+        canvas {
+            max-width: 100% !important;
+            height: auto !important;
         }
         .file-upload-label {
             transition: background-color 0.15s ease, border-color 0.15s ease;
@@ -53,13 +45,13 @@
     <div class="min-h-screen p-4 flex flex-col items-center justify-center">
         <header class="text-center mb-10 w-full max-w-xl">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-2">Branded QR Code Generator</h1>
-            <p class="text-lg text-gray-500">Create shareable QR codes with your custom logo embedded.</p>
+            <p class="text-lg text-gray-500">Create shareable QR codes with custom styles and logos.</p>
         </header>
 
-        <main class="w-full max-w-4xl bg-white p-6 md:p-10 rounded-xl shadow-2xl grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <main class="w-full max-w-5xl bg-white p-6 md:p-10 rounded-xl shadow-2xl grid grid-cols-1 lg:grid-cols-2 gap-8">
 
             <!-- Control Panel -->
-            <div class="space-y-6">
+            <div class="space-y-6 overflow-y-auto max-h-[70vh] pr-2 custom-scrollbar">
                 <h2 class="text-2xl font-semibold text-gray-800 border-b pb-3 mb-4">Settings</h2>
 
                 <!-- 1. URL Input -->
@@ -69,7 +61,26 @@
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150">
                 </div>
 
-                <!-- 2. Logo Upload -->
+                <!-- 2. QR Style Selection -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">QR Body Style</label>
+                    <div class="flex flex-wrap gap-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="qr-style" value="square" checked class="form-radio text-blue-600 h-4 w-4" >
+                            <span class="ml-2 text-sm text-gray-700">Square</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="qr-style" value="dots" class="form-radio text-blue-600 h-4 w-4" >
+                            <span class="ml-2 text-sm text-gray-700">Dots</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="qr-style" value="rounded" class="form-radio text-blue-600 h-4 w-4" >
+                            <span class="ml-2 text-sm text-gray-700">Rounded</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 3. Logo Upload -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Custom Center Logo (Optional)</label>
                     <div class="flex items-center space-x-4">
@@ -84,7 +95,7 @@
                     <p id="file-name" class="mt-2 text-xs text-gray-500">No file selected.</p>
                 </div>
 
-                <!-- 2c. Pre-defined Logos -->
+                <!-- 4. Pre-defined Logos -->
                 <div id="predefined-logo-control">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Use Pre-defined Logo</label>
                     <div id="logo-selection-grid" class="flex flex-wrap gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
@@ -93,17 +104,17 @@
                     <button id="clear-predefined-logo" class="mt-2 px-3 py-1 text-xs font-medium text-gray-600 bg-white hover:bg-gray-100 rounded-lg border border-gray-300 transition duration-150 hidden">Clear Pre-defined Selection</button>
                 </div>
                 
-                <!-- 2a. Logo Size Input -->
+                <!-- 5. Logo Size Input -->
                 <div id="logo-size-control">
                     <label for="logo-size" class="block text-sm font-medium text-gray-700 mb-1">Logo Size (% of QR Code)</label>
-                    <input type="number" id="logo-size" value="25" min="10" max="30" 
+                    <input type="number" id="logo-size" value="25" min="10" max="35" 
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150">
-                    <p class="mt-2 text-xs text-gray-500">Max recommended size is 30% (requires High error correction level).</p>
+                    <p class="mt-2 text-xs text-gray-500">Max recommended size is 35% (requires High error correction level).</p>
                 </div>
 
-                <!-- 2b. Logo Style/Border -->
+                <!-- 6. Logo Style/Border -->
                 <div id="logo-style-control">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Logo Style</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Logo Background Style</label>
                     <div class="flex flex-wrap gap-4">
                         <label class="inline-flex items-center">
                             <input type="radio" name="logo-style" value="rounded" checked class="form-radio text-blue-600 h-4 w-4" >
@@ -115,39 +126,37 @@
                         </label>
                         <label class="inline-flex items-center">
                             <input type="radio" name="logo-style" value="none" class="form-radio text-blue-600 h-4 w-4" >
-                            <span class="ml-2 text-sm text-gray-700">No Border/Background</span>
+                            <span class="ml-2 text-sm text-gray-700">None</span>
                         </label>
                     </div>
                 </div>
 
-                <!-- 3. QR Options (Color) -->
+                <!-- 7. QR Options (Color) -->
                 <div class="flex space-x-4">
                     <div>
-                        <label for="color-dark" class="block text-sm font-medium text-gray-700 mb-1">QR Foreground Color</label>
+                        <label for="color-dark" class="block text-sm font-medium text-gray-700 mb-1">QR Color</label>
                         <input type="color" id="color-dark" value="#000000" class="h-10 w-24 border border-gray-300 rounded-lg p-1">
                     </div>
                     <div>
-                        <label for="color-light" class="block text-sm font-medium text-gray-700 mb-1">QR Background Color</label>
+                        <label for="color-light" class="block text-sm font-medium text-gray-700 mb-1">Background</label>
                         <input type="color" id="color-light" value="#ffffff" class="h-10 w-24 border border-gray-300 rounded-lg p-1">
                     </div>
                 </div>
 
-                <!-- 4. Error Correction Level Selector -->
+                <!-- 8. Error Correction Level Selector -->
                 <div>
                     <label for="level-select" class="block text-sm font-medium text-gray-700 mb-1">Error Correction Level</label>
                     <select id="level-select" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150">
-                        <!-- H is default in JS/initQR -->
                         <option value="H" data-tolerance="30%">H (High - 30% Damage Tolerance)</option>
                         <option value="Q" data-tolerance="25%">Q (Quartile - 25% Damage Tolerance)</option>
                         <option value="M" data-tolerance="15%">M (Medium - 15% Damage Tolerance)</option>
                         <option value="L" data-tolerance="7%">L (Low - 7% Damage Tolerance)</option>
                     </select>
-                    <p id="level-tolerance" class="mt-2 text-xs text-gray-500">Damage Tolerance: 30%</p>
                 </div>
                 
-                <!-- 5. Generate Button -->
+                <!-- 9. Generate Button -->
                 <button id="generate-button"
-                        class="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl shadow-md hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out transform hover:scale-[1.01]">
+                        class="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl shadow-md hover:bg-blue-700 transition duration-150 ease-in-out transform hover:scale-[1.01]">
                     Generate QR Code
                 </button>
             </div>
@@ -156,15 +165,14 @@
             <div class="flex flex-col items-center justify-start space-y-6 lg:border-l lg:pl-8">
                 <h2 class="text-2xl font-semibold text-gray-800 border-b pb-3 mb-4 w-full">Preview</h2>
 
-                <!-- QR Code Container (300x300 for smooth preview) -->
+                <!-- QR Code Container -->
                 <div id="qr-container">
-                    <canvas id="qr-canvas" width="300" height="300"></canvas>
-                    <img id="logo-preview" src="" alt="Custom Logo" class="hidden">
+                    <div id="qr-render"></div>
                 </div>
 
                 <!-- Download Button -->
-                <button id="download-button" disabled
-                        class="w-full max-w-xs px-6 py-3 bg-green-500 text-white font-semibold rounded-xl shadow-md hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-150 ease-in-out">
+                <button id="download-button"
+                        class="w-full max-w-xs px-6 py-3 bg-green-500 text-white font-semibold rounded-xl shadow-md hover:bg-green-600 disabled:bg-gray-400 transition duration-150 ease-in-out">
                     Download High-Res PNG
                 </button>
 
@@ -180,11 +188,10 @@
         </footer>
     </div>
 
-    <!-- qrious library for QR Code generation (lightweight and works well with canvas) -->
-    <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+    <!-- qr-code-styling library -->
+    <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
 
     <script>
-        // Global references
         const urlInput = document.getElementById('url-input');
         const logoUpload = document.getElementById('logo-upload');
         const removeLogoBtn = document.getElementById('remove-logo');
@@ -192,26 +199,20 @@
         const colorLightInput = document.getElementById('color-light');
         const generateButton = document.getElementById('generate-button');
         const downloadButton = document.getElementById('download-button');
-        const logoPreview = document.getElementById('logo-preview');
-        const qrCanvas = document.getElementById('qr-canvas');
+        const qrRenderContainer = document.getElementById('qr-render');
         const statusMessage = document.getElementById('status-message');
         const fileNameDisplay = document.getElementById('file-name');
         
-        // New elements for customization
         const levelSelect = document.getElementById('level-select');
-        const levelTolerance = document.getElementById('level-tolerance');
         const logoSizeInput = document.getElementById('logo-size');
         const logoStyleInputs = document.querySelectorAll('input[name="logo-style"]');
-        
-        let qr = null; // Holds the QRious instance
+        const qrStyleInputs = document.querySelectorAll('input[name="qr-style"]');
+
+        let qrCode = null; 
         let currentLogoDataURL = null;
         
-        const ORIGINAL_SIZE = 300;
-        const HIGH_RES_SIZE = 1000; // Target resolution for high-quality printing
-        
-        // --- Pre-defined Logo Data (Using simple SVG data URLs) ---
-        
-        // Helper to generate simple SVGs for data URLs
+        const PREVIEW_SIZE = 300;
+
         const createSvgDataUrl = (svgContent) => {
             const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">${svgContent}</svg>`;
             return `data:image/svg+xml;base64,${btoa(svg)}`;
@@ -219,51 +220,108 @@
 
         const LOGO_SVGS = {
             'whatsapp': createSvgDataUrl('<path fill="#4FCE5D" d="M12 0a12 12 0 0 0-9.6 19.3L1 23l4-1.2A11.9 11.9 0 0 0 12 24h.1a12 12 0 0 0 12-12 12 12 0 0 0-12-12zm6.6 14.1c-.2.5-.5.7-.9.8-.3.1-.9.2-1.4-.2-.5-.4-1.6-1-1.9-1-.3 0-.6 0-.8.2-.2.2-.8.8-.9.9s-.4.2-.7.2c-.3 0-.9-.3-1.6-.9-.6-.6-1.1-1.4-1.5-2.2-.4-.8-.1-1.3 0-1.4.1-.1.2-.3.3-.4.1-.1.2-.2.3-.4.1-.2 0-.4 0-.5 0-.1-.4-.8-.6-1-.2-.2-.5-.1-.7-.1-.2 0-.4 0-.6 0c-.2 0-.6.1-.9.5-.3.4-1.1 1.1-1.1 2.7 0 1.6 1.1 3.1 1.2 3.2.1.2 2.1 3.5 5.3 4.8 3.3 1.2 3.3 1.2 3.9 1.2.6 0 1.9-.7 2.2-1.5.3-.9.3-1.5.2-1.7-.1-.2-.3-.3-.6-.4z"/>'),
-            'instagram': createSvgDataUrl('<rect width="24" height="24" rx="6" fill="#D62976"/><defs><linearGradient id="igGrad" x1="0" x2="100%" y1="0" y2="100%"><stop offset="0%" stop-color="#feda75"/><stop offset="50%" stop-color="#fa7e1e"/><stop offset="100%" stop-color="#d62976"/></linearGradient></defs><circle cx="12" cy="12" r="5" fill="white" fill-opacity="0"/><circle cx="12" cy="12" r="4.5" fill="none" stroke="white" stroke-width="2.5"/><circle cx="12" cy="12" r="2.5" fill="white"/><circle cx="18" cy="6" r="1.5" fill="white"/>'),
+            'instagram': createSvgDataUrl('<rect width="24" height="24" rx="6" fill="#D62976"/><circle cx="12" cy="12" r="4.5" fill="none" stroke="white" stroke-width="2.5"/><circle cx="12" cy="12" r="2.5" fill="white"/><circle cx="18" cy="6" r="1.5" fill="white"/>'),
             'facebook': createSvgDataUrl('<rect width="24" height="24" rx="4" fill="#3B5998"/><path fill="white" d="M14 10h3l-1 5h-2v9h-5v-9H6v-5h3V8c0-1.7 1-3 3-3h3v5z"/>'),
             'youtube': createSvgDataUrl('<rect width="24" height="24" rx="4" fill="#FF0000"/><path fill="white" d="M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM9.5 16.5l6-4.5-6-4.5v9z"/>'),
-            'x-twitter': createSvgDataUrl('<rect width="24" height="24" fill="#000000"/><path fill="white" d="M18.244 2.25h3.308l-7.227 8.256L21.6 21.75h-5.267L8.953 14.185 3.49 21.75H.97l7.865-8.877L.125 2.25h5.304l5.008 6.095L18.244 2.25zM16.143 19.512h1.666l-6.19-11.898H9.36L16.143 19.512z"/>'),
+            'x-twitter': createSvgDataUrl('<rect width="24" height="24" fill="#000000"/><path fill="white" d="M18.244 2.25h3.308l-7.227 8.256L21.6 21.75h-5.267L8.953 14.185 3.49 21.75H.97l7.865-8.877L.125 2.25h5.304l5.008 6.095L18.244 2.25z"/>'),
             'website': createSvgDataUrl('<circle cx="12" cy="12" r="10" fill="none" stroke="#4B5563" stroke-width="2"/><ellipse cx="12" cy="12" rx="10" ry="4" fill="none" stroke="#4B5563" stroke-width="2"/><path fill="none" stroke="#4B5563" stroke-width="2" d="M2 12h20M12 2v20"/>')
         };
 
+        // --- Helper: Apply Shape to Logo ---
+        async function getStyledLogo(base64, shape, bgColor) {
+            if (shape === 'none' || !base64) return base64;
 
-        // --- New Helper Functions ---
-        function getLogoSizeFactor() {
-            let size = parseInt(logoSizeInput.value, 10) || 25;
-            // Cap size between 10% and 30%
-            return Math.min(30, Math.max(10, size)) / 100;
+            return new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+
+                img.onload = () => {
+                    const size = 512; // High-res internal processing
+                    canvas.width = size;
+                    canvas.height = size;
+
+                    // 1. Draw Background Shape
+                    ctx.fillStyle = bgColor;
+                    if (shape === 'circle') {
+                        ctx.beginPath();
+                        ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else if (shape === 'rounded') {
+                        const radius = 80;
+                        ctx.beginPath();
+                        ctx.roundRect(0, 0, size, size, radius);
+                        ctx.fill();
+                    }
+
+                    // 2. Draw Logo (centered with padding)
+                    const padding = size * 0.15;
+                    const drawSize = size - (padding * 2);
+                    
+                    // Maintain aspect ratio
+                    const ratio = img.width / img.height;
+                    let w = drawSize, h = drawSize;
+                    if (ratio > 1) h = drawSize / ratio;
+                    else w = drawSize * ratio;
+
+                    ctx.drawImage(img, (size-w)/2, (size-h)/2, w, h);
+                    resolve(canvas.toDataURL('image/png'));
+                };
+                img.src = base64;
+            });
         }
 
-        function getLogoStyle() {
-            return document.querySelector('input[name="logo-style"]:checked')?.value || 'rounded';
+        async function generateQRCode() {
+            const qrStyle = document.querySelector('input[name="qr-style"]:checked').value;
+            const logoBg = document.querySelector('input[name="logo-style"]:checked').value;
+            const sizeFactor = parseInt(logoSizeInput.value, 10) / 100;
+            const bgColor = colorLightInput.value;
+            const dotColor = colorDarkInput.value;
+
+            qrRenderContainer.innerHTML = '';
+            
+            // Apply requested shape to the logo data
+            const finalLogo = await getStyledLogo(currentLogoDataURL, logoBg, bgColor);
+
+            const cornerType = qrStyle === 'dots' ? 'dot' : (qrStyle === 'rounded' ? 'extra-rounded' : 'square');
+
+            const options = {
+                width: PREVIEW_SIZE,
+                height: PREVIEW_SIZE,
+                type: "canvas",
+                data: urlInput.value || "https://www.google.com",
+                image: finalLogo,
+                dotsOptions: {
+                    color: dotColor,
+                    type: qrStyle === 'rounded' ? 'rounded' : (qrStyle === 'dots' ? 'dots' : 'square')
+                },
+                backgroundOptions: {
+                    color: bgColor,
+                },
+                imageOptions: {
+                    crossOrigin: "anonymous",
+                    margin: logoBg === 'none' ? 0 : 4,
+                    imageSize: sizeFactor,
+                    hideBackgroundDots: true
+                },
+                qrOptions: {
+                    errorCorrectionLevel: levelSelect.value
+                },
+                cornersSquareOptions: {
+                    type: cornerType,
+                    color: dotColor
+                },
+                cornersDotOptions: {
+                    type: cornerType === 'dot' ? 'dot' : 'square',
+                    color: dotColor
+                }
+            };
+
+            qrCode = new QRCodeStyling(options);
+            qrCode.append(qrRenderContainer);
+            statusMessage.textContent = 'QR Code generated!';
         }
 
-        // --- Core Functions ---
-
-        // Initialize or update QRious parameters (always uses ORIGINAL_SIZE for preview)
-        function initQR() {
-            const level = levelSelect.value || 'H';
-            const value = urlInput.value || 'https://www.google.com';
-
-            if (!qr) {
-                qr = new QRious({
-                    element: qrCanvas,
-                    size: ORIGINAL_SIZE,
-                    value: value,
-                    level: level, 
-                });
-            } else {
-                qr.value = value;
-                qr.background = colorLightInput.value;
-                qr.foreground = colorDarkInput.value;
-                qr.level = level;
-                qr.size = ORIGINAL_SIZE; // Ensure size is reset for preview
-            }
-        }
-        
-        /**
-         * Renders the pre-defined logo selection grid and binds click handlers.
-         */
         function renderLogoSelectionGrid() {
             const container = document.getElementById('logo-selection-grid');
             const clearButton = document.getElementById('clear-predefined-logo');
@@ -271,19 +329,15 @@
             
             Object.keys(LOGO_SVGS).forEach(key => {
                 const dataUrl = LOGO_SVGS[key];
-                const name = key.charAt(0).toUpperCase() + key.slice(1).replace('-', '/');
-                
                 const div = document.createElement('div');
                 div.className = 'flex flex-col items-center p-2 rounded-lg cursor-pointer hover:bg-white transition duration-150 border-2 border-transparent';
-                div.title = name;
-
+                
                 const img = document.createElement('img');
                 img.src = dataUrl;
-                img.alt = name;
-                img.className = 'w-8 h-8'; // Fixed size for display
+                img.className = 'w-8 h-8 pointer-events-none';
 
                 const span = document.createElement('span');
-                span.className = 'text-xs text-gray-700 mt-1 capitalize';
+                span.className = 'text-[10px] text-gray-700 mt-1 capitalize pointer-events-none';
                 span.textContent = key.replace('-', ' ');
 
                 div.appendChild(img);
@@ -291,258 +345,41 @@
                 container.appendChild(div);
 
                 div.addEventListener('click', () => {
-                    // Set the current logo data
                     currentLogoDataURL = dataUrl;
-                    // Clear the file upload input (prevents accidental custom logo overwrite)
                     logoUpload.value = '';
-                    fileNameDisplay.textContent = `Pre-defined: ${name}`;
+                    fileNameDisplay.textContent = `Pre-defined: ${key}`;
                     removeLogoBtn.classList.remove('hidden');
-                    
-                    // Update selection state (border)
-                    document.querySelectorAll('#logo-selection-grid > div').forEach(d => {
-                        d.classList.remove('border-blue-500', 'bg-white');
-                    });
-                    div.classList.add('border-blue-500', 'bg-white');
-                    
-                    // Show clear button
                     clearButton.classList.remove('hidden');
-
+                    document.querySelectorAll('#logo-selection-grid > div').forEach(d => d.classList.remove('border-blue-500', 'bg-white'));
+                    div.classList.add('border-blue-500', 'bg-white');
                     generateQRCode();
                 });
             });
             
-            clearButton.addEventListener('click', () => {
-                currentLogoDataURL = null;
-                clearButton.classList.add('hidden');
-                fileNameDisplay.textContent = 'No file selected.';
-                removeLogoBtn.classList.add('hidden');
-                document.querySelectorAll('#logo-selection-grid > div').forEach(d => {
-                    d.classList.remove('border-blue-500', 'bg-white');
-                });
-                generateQRCode();
-            });
+            clearButton.addEventListener('click', removeLogo);
         }
 
-
-        // Wrapper for preview drawing
-        function drawLogo() {
-            // Setup temporary QR data object for preview drawing
-            const qrData = {
-                value: qr.value,
-                level: qr.level,
-                background: qr.background,
-                foreground: qr.foreground
-            };
-
-            // Before drawing the logo, ensure the preview image reflects the style/size
-            if (currentLogoDataURL) {
-                const style = getLogoStyle();
-                const logoSizeFactor = getLogoSizeFactor();
-                const factor = logoSizeFactor * 100;
-                
-                // Update CSS styling of the <img id="logo-preview"> element
-                logoPreview.style.maxWidth = `${factor}%`;
-                logoPreview.style.maxHeight = `${factor}%`;
-                logoPreview.style.borderRadius = (style === 'circle') ? '50%' : '8px';
-                // Add padding/background/shadow only if not 'none' style
-                logoPreview.style.padding = (style === 'none') ? '0' : '4px';
-                logoPreview.style.backgroundColor = (style === 'none') ? 'transparent' : 'white';
-                logoPreview.style.boxShadow = (style === 'none') ? 'none' : '0 2px 5px rgba(0, 0, 0, 0.2)';
-
-                logoPreview.src = currentLogoDataURL;
-                logoPreview.style.display = 'block';
-            } else {
-                logoPreview.style.display = 'none';
-            }
-
-            drawBrandedQRCode(qrCanvas, currentLogoDataURL, ORIGINAL_SIZE, qrData);
-        }
-        
-        // Function to generate and redraw the QR code for preview
-        function generateQRCode() {
-            initQR(); 
-            
-            // Re-render the canvas with new parameters
-            qr.set({ 
-                value: qr.value, 
-                background: qr.background, 
-                foreground: qr.foreground,
-                level: qr.level 
-            }); 
-            
-            drawLogo();
-            downloadButton.disabled = false;
-            statusMessage.textContent = 'QR Code generated successfully!';
-        }
-
-        /**
-         * Unified function to draw the QR code pattern and then the logo on top.
-         * @param {HTMLCanvasElement} canvas The canvas to draw on.
-         * @param {string | null} logoDataURL The data URL of the logo image.
-         * @param {number} size The resolution of the canvas (e.g., 300 or 1000).
-         * @param {object} qrData The QR code configuration data.
-         * @returns {Promise<void>} A promise that resolves when drawing is complete.
-         */
-        function drawBrandedQRCode(canvas, logoDataURL, size, qrData) {
-            return new Promise(resolve => {
-                const ctx = canvas.getContext('2d');
-                
-                // 1. Draw the QR code pattern using a temporary QRious instance
-                const tempQR = new QRious({
-                    element: canvas,
-                    size: size,
-                    value: qrData.value,
-                    level: qrData.level,
-                    background: qrData.background,
-                    foreground: qrData.foreground
-                });
-                // Force draw
-                tempQR.set({ size: size });
-                
-                if (!logoDataURL) {
-                    return resolve();
-                }
-
-                const style = getLogoStyle();
-                const logoSizeFactor = getLogoSizeFactor();
-
-                const img = new Image();
-                img.onload = function() {
-                    const logoSize = size * logoSizeFactor; 
-                    const x = (size - logoSize) / 2; 
-                    const y = (size - logoSize) / 2; 
-                    
-                    const scaleFactor = size / ORIGINAL_SIZE; 
-                    const cornerRadius = 8 * scaleFactor; 
-                    const imagePadding = (style === 'none') ? 0 : (4 * scaleFactor); 
-
-                    // --- 1. Draw Background/Mask based on Style ---
-                    ctx.save(); // Save context state before drawing and clipping
-
-                    if (style !== 'none') {
-                        // Draw background
-                        ctx.fillStyle = qrData.background; // Use QR background color for padding
-                        ctx.beginPath();
-                        
-                        if (style === 'circle') {
-                            const center = size / 2;
-                            ctx.arc(center, center, logoSize / 2, 0, Math.PI * 2);
-                        } else { // 'rounded'
-                            ctx.moveTo(x + cornerRadius, y);
-                            ctx.lineTo(x + logoSize - cornerRadius, y);
-                            ctx.arcTo(x + logoSize, y, x + logoSize, y + cornerRadius, cornerRadius);
-                            ctx.lineTo(x + logoSize, y + logoSize - cornerRadius);
-                            ctx.arcTo(x + logoSize, y + logoSize, x + logoSize - cornerRadius, y + logoSize, cornerRadius);
-                            ctx.lineTo(x + cornerRadius, y + logoSize);
-                            ctx.arcTo(x, y + logoSize, x, y + logoSize - cornerRadius, cornerRadius);
-                            ctx.lineTo(x, y + cornerRadius);
-                            ctx.arcTo(x, y, x + cornerRadius, y, cornerRadius);
-                        }
-                        ctx.closePath();
-                        ctx.fill();
-                        
-                        // Clip the image to this shape
-                        ctx.clip(); 
-                    }
-                    
-                    // Disable image smoothing for sharper edges on the logo itself
-                    ctx.imageSmoothingEnabled = false;
-
-                    // --- 2. Calculate Drawing Dimensions (Constrained to Bounded Box) ---
-                    const boundedSize = logoSize - (imagePadding * 2);
-                    let drawWidth = boundedSize;
-                    let drawHeight = boundedSize;
-                    let offsetX = 0;
-                    let offsetY = 0;
-
-                    const ratio = img.width / img.height;
-
-                    if (ratio > 1) { // Landscape
-                        drawHeight = boundedSize / ratio;
-                        offsetY = (boundedSize - drawHeight) / 2;
-                    } else if (ratio < 1) { // Portrait
-                        drawWidth = boundedSize * ratio;
-                        offsetX = (boundedSize - drawWidth) / 2;
-                    }
-
-                    // --- 3. Draw the logo image ---
-                    // This is drawn over the background and clipped by the path
-                    ctx.drawImage(img, 
-                        x + imagePadding + offsetX, 
-                        y + imagePadding + offsetY, 
-                        drawWidth, 
-                        drawHeight
-                    );
-                    
-                    ctx.restore(); // Restore context to remove clipping and background drawing
-                    resolve();
-
-                };
-                img.onerror = () => resolve(); 
-                img.src = logoDataURL;
-            });
-        }
-
-
-        // Function to remove the logo (custom file or predefined)
         function removeLogo() {
             currentLogoDataURL = null;
-            logoUpload.value = ''; // Clear file input
-            logoPreview.style.display = 'none';
+            logoUpload.value = '';
             fileNameDisplay.textContent = 'No file selected.';
             removeLogoBtn.classList.add('hidden');
-            
-            // Clear predefined selection visual state
-            const clearButton = document.getElementById('clear-predefined-logo');
-            clearButton.classList.add('hidden');
-            document.querySelectorAll('#logo-selection-grid > div').forEach(d => {
-                d.classList.remove('border-blue-500', 'bg-white');
-            });
-            
-            generateQRCode(); // Regenerate QR code without logo
+            document.getElementById('clear-predefined-logo').classList.add('hidden');
+            document.querySelectorAll('#logo-selection-grid > div').forEach(d => d.classList.remove('border-blue-500', 'bg-white'));
+            generateQRCode();
         }
 
-        // Function to handle the download, now generating a high-res image
         async function downloadQRCode() {
-            if (downloadButton.disabled) {
-                statusMessage.textContent = 'Please generate the QR code first!';
-                return;
-            }
-
-            // 1. Create a temporary high-res canvas for export
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = HIGH_RES_SIZE;
-            tempCanvas.height = HIGH_RES_SIZE;
+            if (!qrCode) return;
+            const urlValue = urlInput.value.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\//g, '_').substring(0, 20);
             
-            // 2. Gather QR data
-            const qrData = {
-                value: urlInput.value,
-                level: levelSelect.value,
-                background: colorLightInput.value,
-                foreground: colorDarkInput.value
-            };
-
-            // 3. Draw the full high-res QR code with logo
-            await drawBrandedQRCode(tempCanvas, currentLogoDataURL, HIGH_RES_SIZE, qrData);
-            
-            // 4. Download the high-res canvas content
-            const dataURL = tempCanvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            
-            const urlValue = urlInput.value.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\//g, '_');
-            link.download = `QR-HighRes-${urlValue.substring(0, 20) || 'default'}.png`;
-            link.href = dataURL;
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            statusMessage.textContent = 'High-resolution download started!';
+            // High-res export requires updating the instance temporarily
+            qrCode.download({
+                name: `QR-${urlValue || 'code'}`,
+                extension: "png"
+            });
         }
         
-        // --- Event Listeners ---
-        
-        // Logo Upload Handler
         logoUpload.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -551,51 +388,26 @@
                     currentLogoDataURL = event.target.result;
                     fileNameDisplay.textContent = file.name;
                     removeLogoBtn.classList.remove('hidden');
-                    
-                    // Clear predefined selection highlight when a custom file is uploaded
-                    const clearButton = document.getElementById('clear-predefined-logo');
-                    clearButton.classList.add('hidden');
-                    document.querySelectorAll('#logo-selection-grid > div').forEach(d => {
-                        d.classList.remove('border-blue-500', 'bg-white');
-                    });
-
+                    document.querySelectorAll('#logo-selection-grid > div').forEach(d => d.classList.remove('border-blue-500', 'bg-white'));
                     generateQRCode();
                 };
                 reader.readAsDataURL(file);
-            } else {
-                removeLogo();
             }
         });
 
-        // Level Change Handler
-        levelSelect.addEventListener('change', () => {
-            levelTolerance.textContent = `Damage Tolerance: ${levelSelect.options[levelSelect.selectedIndex].dataset.tolerance}`;
-            generateQRCode();
-        });
-        
-        // --- Initial Setup and Bindings ---
-
         window.onload = () => {
-            // Render the social media logo selection grid
             renderLogoSelectionGrid();
-            
-            // Initial call to set up the default QR code
             generateQRCode(); 
-
-            // Bind remaining event listeners
             generateButton.addEventListener('click', generateQRCode);
             downloadButton.addEventListener('click', downloadQRCode);
-            
-            // Re-generate on input/color changes
             urlInput.addEventListener('input', generateQRCode);
             colorDarkInput.addEventListener('input', generateQRCode);
             colorLightInput.addEventListener('input', generateQRCode);
-
-            // New listeners for logo customization
             logoSizeInput.addEventListener('input', generateQRCode);
             logoStyleInputs.forEach(input => input.addEventListener('change', generateQRCode));
+            qrStyleInputs.forEach(input => input.addEventListener('change', generateQRCode));
+            levelSelect.addEventListener('change', generateQRCode);
         };
     </script>
-
 </body>
-</html>- Install pre-done .msi package, all activated.
+</html>
