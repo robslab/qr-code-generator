@@ -3,190 +3,290 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Branded QR Code Generator</title>
+    <title>Premium Branded QR Studio</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Inter Font -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --accent-primary: #2563eb;
+            --slate-premium: #0f172a;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f7f7fa;
+            background: #f8fafc;
+            color: #0f172a;
+            overflow-x: hidden;
         }
-        /* Custom styles for the QR code container */
-        #qr-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            width: 300px;
-            height: 300px;
-            margin: 0 auto;
-            background: white;
+
+        /* Ambient Background */
+        .ambient-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 5% 5%, rgba(37, 99, 235, 0.04) 0%, transparent 35%),
+                radial-gradient(circle at 95% 95%, rgba(79, 70, 229, 0.04) 0%, transparent 35%);
+        }
+
+        /* High-End Glassmorphism */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03), 0 10px 15px -3px rgba(0, 0, 0, 0.02);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 20px;
+        }
+
+        .btn-premium {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-premium:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        #qr-render canvas {
             border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-        }
-        canvas {
             max-width: 100% !important;
             height: auto !important;
+            display: block;
         }
-        .file-upload-label {
-            transition: background-color 0.15s ease, border-color 0.15s ease;
-            cursor: pointer;
-        }
-        .file-upload-label:hover {
-            background-color: #e5e7eb;
+
+        @media (min-width: 1024px) {
+            .sticky-preview {
+                position: sticky;
+                top: 2rem;
+            }
         }
     </style>
 </head>
-<body>
+<body class="min-h-screen selection:bg-blue-100 selection:text-blue-900 flex flex-col relative">
+    <div class="ambient-glow"></div>
 
-    <div class="min-h-screen p-4 flex flex-col items-center justify-center">
-        <header class="text-center mb-10 w-full max-w-xl">
-            <h1 class="text-4xl font-extrabold text-gray-900 mb-2">Branded QR Code Generator</h1>
-            <p class="text-lg text-gray-500">Create shareable QR codes with custom styles and logos.</p>
-        </header>
-
-        <main class="w-full max-w-5xl bg-white p-6 md:p-10 rounded-xl shadow-2xl grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-            <!-- Control Panel -->
-            <div class="space-y-6 overflow-y-auto max-h-[70vh] pr-2 custom-scrollbar">
-                <h2 class="text-2xl font-semibold text-gray-800 border-b pb-3 mb-4">Settings</h2>
-
-                <!-- 1. URL Input -->
-                <div>
-                    <label for="url-input" class="block text-sm font-medium text-gray-700 mb-1">Link to Encode</label>
-                    <input type="url" id="url-input" value="https://www.google.com" placeholder="e.g., https://www.yourwebsite.com"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150">
+    <div class="flex-grow">
+        <div class="max-w-7xl mx-auto px-4 py-8 md:py-16">
+            <!-- Header -->
+            <header class="text-center mb-12">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 mb-4 text-[9px] font-black uppercase tracking-[0.4em] text-blue-600 bg-blue-50/50 rounded-full border border-blue-100/50">
+                    Elite Branded Studio
                 </div>
+                <h1 class="text-4xl md:text-7xl font-black text-slate-900 tracking-tight mb-4">
+                    QR <span class="text-transparent bg-clip-text bg-gradient-to-br from-slate-900 via-blue-600 to-indigo-600">Studio.</span>
+                </h1>
+                <p class="text-md md:text-lg text-slate-400 max-w-xl mx-auto font-medium">
+                    Professional grade QR generation with 3000px Master Export.
+                </p>
+            </header>
 
-                <!-- 2. QR Style Selection -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">QR Body Style</label>
-                    <div class="flex flex-wrap gap-4">
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="qr-style" value="square" checked class="form-radio text-blue-600 h-4 w-4" >
-                            <span class="ml-2 text-sm text-gray-700">Square</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="qr-style" value="dots" class="form-radio text-blue-600 h-4 w-4" >
-                            <span class="ml-2 text-sm text-gray-700">Dots</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="qr-style" value="rounded" class="form-radio text-blue-600 h-4 w-4" >
-                            <span class="ml-2 text-sm text-gray-700">Rounded</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- 3. Logo Upload -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Custom Center Logo (Optional)</label>
-                    <div class="flex items-center space-x-4">
-                        <label for="logo-upload" class="file-upload-label px-4 py-2 border border-gray-300 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition duration-150">
-                            Choose Image
-                            <input type="file" id="logo-upload" accept="image/*" class="hidden">
-                        </label>
-                        <button id="remove-logo" class="px-3 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition duration-150 hidden" onclick="removeLogo()">
-                            Remove Logo
-                        </button>
-                    </div>
-                    <p id="file-name" class="mt-2 text-xs text-gray-500">No file selected.</p>
-                </div>
-
-                <!-- 4. Pre-defined Logos -->
-                <div id="predefined-logo-control">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Use Pre-defined Logo</label>
-                    <div id="logo-selection-grid" class="flex flex-wrap gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                        <!-- Icons will be generated here by JavaScript -->
-                    </div>
-                    <button id="clear-predefined-logo" class="mt-2 px-3 py-1 text-xs font-medium text-gray-600 bg-white hover:bg-gray-100 rounded-lg border border-gray-300 transition duration-150 hidden">Clear Pre-defined Selection</button>
-                </div>
+            <!-- Main Workspace -->
+            <main class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pb-20">
                 
-                <!-- 5. Logo Size Input -->
-                <div id="logo-size-control">
-                    <label for="logo-size" class="block text-sm font-medium text-gray-700 mb-1">Logo Size (% of QR Code)</label>
-                    <input type="number" id="logo-size" value="25" min="10" max="35" 
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150">
-                    <p class="mt-2 text-xs text-gray-500">Max recommended size is 35% (requires High error correction level).</p>
-                </div>
+                <!-- Settings Panel -->
+                <div class="lg:col-span-7 glass-panel rounded-[2rem] p-6 md:p-10">
+                    <div class="flex items-center justify-between mb-10 border-b border-slate-100 pb-6">
+                        <h2 class="text-xl font-black text-slate-900 flex items-center gap-3">
+                            <span class="w-1.5 h-6 bg-blue-600 rounded-full"></span>
+                            Configurator
+                        </h2>
+                    </div>
 
-                <!-- 6. Logo Style/Border -->
-                <div id="logo-style-control">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Logo Background Style</label>
-                    <div class="flex flex-wrap gap-4">
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="logo-style" value="rounded" checked class="form-radio text-blue-600 h-4 w-4" >
-                            <span class="ml-2 text-sm text-gray-700">Rounded Square</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="logo-style" value="circle" class="form-radio text-blue-600 h-4 w-4" >
-                            <span class="ml-2 text-sm text-gray-700">Circle</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="logo-style" value="none" class="form-radio text-blue-600 h-4 w-4" >
-                            <span class="ml-2 text-sm text-gray-700">None</span>
-                        </label>
+                    <div class="space-y-10 custom-scrollbar max-h-[calc(100vh-450px)] lg:max-h-none overflow-y-auto pr-2">
+                        <!-- URL -->
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Target Link</label>
+                            <input type="url" id="url-input" value="https://www.google.com" 
+                                   class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 outline-none transition-all font-semibold text-slate-700">
+                        </div>
+
+                        <!-- Pattern Selection -->
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Pattern Geometry</label>
+                            <div class="grid grid-cols-3 gap-3">
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="qr-style" value="square" checked class="hidden peer">
+                                    <div class="py-3 text-center rounded-xl border-2 border-slate-50 bg-white peer-checked:border-slate-900 peer-checked:bg-slate-900 peer-checked:text-white transition-all font-bold text-[11px] uppercase tracking-wider text-slate-400">Square</div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="qr-style" value="dots" class="hidden peer">
+                                    <div class="py-3 text-center rounded-xl border-2 border-slate-50 bg-white peer-checked:border-slate-900 peer-checked:bg-slate-900 peer-checked:text-white transition-all font-bold text-[11px] uppercase tracking-wider text-slate-400">Dots</div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="qr-style" value="rounded" class="hidden peer">
+                                    <div class="py-3 text-center rounded-xl border-2 border-slate-50 bg-white peer-checked:border-slate-900 peer-checked:bg-slate-900 peer-checked:text-white transition-all font-bold text-[11px] uppercase tracking-wider text-slate-400">Rounded</div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Branding Selection -->
+                        <div class="space-y-4">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Identity Assets</label>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <label for="logo-upload" class="flex items-center gap-2 px-6 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest btn-premium cursor-pointer">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
+                                    Upload Custom
+                                    <input type="file" id="logo-upload" accept="image/*" class="hidden">
+                                </label>
+                                <button id="remove-logo" class="px-5 py-4 text-[10px] font-black uppercase tracking-widest text-rose-500 bg-rose-50 rounded-2xl hover:bg-rose-100 transition-all hidden">Discard</button>
+                            </div>
+                            
+                            <div id="logo-selection-grid" class="flex flex-wrap gap-3 p-6 bg-slate-50/50 rounded-[1.5rem] border border-slate-100">
+                                <!-- Icons generated by JS -->
+                            </div>
+                            <button id="clear-predefined-logo" class="px-1 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-blue-600 transition-all hidden">✕ Reset Identity</button>
+                        </div>
+                        
+                        <!-- Logo Details -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-4">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Identity Scale</label>
+                                <div class="flex items-center gap-4 p-4 bg-white border border-slate-100 rounded-2xl">
+                                    <input type="range" id="logo-size-slider" value="25" min="10" max="35" class="flex-grow">
+                                    <div class="font-black text-slate-900 w-10 text-right text-xs"><span id="logo-size-val">25</span>%</div>
+                                </div>
+                                <input type="hidden" id="logo-size" value="25">
+                            </div>
+
+                            <div class="space-y-4">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Icon Mask</label>
+                                <div class="flex gap-2">
+                                    <label class="cursor-pointer flex-1">
+                                        <input type="radio" name="logo-style" value="rounded" checked class="hidden peer">
+                                        <div class="py-3.5 text-center rounded-xl border-2 border-slate-50 bg-white/50 peer-checked:border-slate-900 peer-checked:bg-slate-900 peer-checked:text-white transition-all font-bold text-[9px] uppercase tracking-widest text-slate-400">Soft</div>
+                                    </label>
+                                    <label class="cursor-pointer flex-1">
+                                        <input type="radio" name="logo-style" value="circle" class="hidden peer">
+                                        <div class="py-3.5 text-center rounded-xl border-2 border-slate-50 bg-white/50 peer-checked:border-slate-900 peer-checked:bg-slate-900 peer-checked:text-white transition-all font-bold text-[9px] uppercase tracking-widest text-slate-400">Circle</div>
+                                    </label>
+                                    <label class="cursor-pointer flex-1">
+                                        <input type="radio" name="logo-style" value="none" class="hidden peer">
+                                        <div class="py-3.5 text-center rounded-xl border-2 border-slate-50 bg-white/50 peer-checked:border-slate-900 peer-checked:bg-slate-900 peer-checked:text-white transition-all font-bold text-[9px] uppercase tracking-widest text-slate-400">None</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Color Controls -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center px-1">
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Primary Hue</label>
+                                    <button id="reset-color-dark" class="text-[9px] font-black text-blue-500 uppercase hover:underline">Default</button>
+                                </div>
+                                <div class="flex items-center gap-3 p-4 bg-white border border-slate-100 rounded-2xl">
+                                    <input type="color" id="color-dark" value="#000000" class="h-8 w-8 border-none bg-transparent cursor-pointer rounded-lg">
+                                    <span class="text-xs font-black text-slate-900 tracking-widest uppercase" id="color-dark-val">#000000</span>
+                                </div>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center px-1">
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Canvas Hue</label>
+                                    <button id="reset-color-light" class="text-[9px] font-black text-blue-500 uppercase hover:underline">Default</button>
+                                </div>
+                                <div class="flex items-center gap-3 p-4 bg-white border border-slate-100 rounded-2xl">
+                                    <input type="color" id="color-light" value="#ffffff" class="h-8 w-8 border-none bg-transparent cursor-pointer rounded-lg">
+                                    <span class="text-xs font-black text-slate-900 tracking-widest uppercase" id="color-light-val">#FFFFFF</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Final Actions (Side-by-Side Fix) -->
+                        <div class="pt-6 flex gap-3 border-t border-slate-100">
+                            <div class="w-1/2">
+                                <select id="level-select" class="w-full px-3 py-4 bg-slate-900 text-white border-none rounded-2xl outline-none font-black text-[9px] uppercase tracking-widest cursor-pointer hover:bg-black transition-colors">
+                                    <option value="H">Stability: Ultra (30%)</option>
+                                    <option value="Q">Stability: High (25%)</option>
+                                    <option value="M">Stability: Med (15%)</option>
+                                    <option value="L">Stability: Low (7%)</option>
+                                </select>
+                            </div>
+                            <button id="generate-button" class="w-1/2 py-4 bg-blue-600 text-white font-black uppercase tracking-widest rounded-2xl btn-premium text-[9px]">
+                                Refresh Blueprint
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 7. QR Options (Color) -->
-                <div class="flex space-x-4">
-                    <div>
-                        <label for="color-dark" class="block text-sm font-medium text-gray-700 mb-1">QR Color</label>
-                        <input type="color" id="color-dark" value="#000000" class="h-10 w-24 border border-gray-300 rounded-lg p-1">
+                <!-- Preview Sidebar -->
+                <div class="lg:col-span-5 sticky-preview">
+                    <div class="glass-panel rounded-[2.5rem] p-8 md:p-10 flex flex-col items-center">
+                        <div class="w-full flex justify-between items-center mb-10">
+                            <h2 class="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em]">Studio Render</h2>
+                            <div class="flex items-center gap-2 px-2 py-1 bg-emerald-50 rounded-full border border-emerald-100">
+                                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span class="text-[8px] font-black text-emerald-600 uppercase tracking-widest">Active</span>
+                            </div>
+                        </div>
+
+                        <!-- QR Output -->
+                        <div id="qr-container" class="bg-white p-4 rounded-3xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.06)] border border-slate-100 flex items-center justify-center aspect-square w-full max-w-[360px] mb-10">
+                            <div id="qr-render"></div>
+                        </div>
+
+                        <div class="w-full space-y-4">
+                            <button id="download-button" class="w-full py-5 bg-slate-900 text-white font-black uppercase tracking-widest rounded-2xl btn-premium flex items-center justify-center gap-3 text-[10px]">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0L8 8m4-4v12"></path></svg>
+                                Download Master
+                            </button>
+                            <div id="status-message" class="text-center text-[9px] font-black text-blue-500 uppercase tracking-widest min-h-[1.5rem]"></div>
+                        </div>
+
+                        <!-- Technical Specs -->
+                        <div class="pt-8 border-t border-slate-100 w-full mt-6">
+                            <div class="flex justify-around items-center">
+                                <div class="text-center">
+                                    <p class="text-slate-900 font-black text-lg tracking-tight">3000<span class="text-slate-300 text-[8px] ml-0.5 uppercase">px</span></p>
+                                    <p class="text-[7px] text-slate-400 font-black uppercase tracking-widest mt-1">Master Res</p>
+                                </div>
+                                <div class="w-px h-8 bg-slate-100"></div>
+                                <div class="text-center">
+                                    <p class="text-slate-900 font-black text-lg tracking-tight">300<span class="text-slate-300 text-[8px] ml-0.5 uppercase">dpi</span></p>
+                                    <p class="text-[7px] text-slate-400 font-black uppercase tracking-widest mt-1">High Grade</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label for="color-light" class="block text-sm font-medium text-gray-700 mb-1">Background</label>
-                        <input type="color" id="color-light" value="#ffffff" class="h-10 w-24 border border-gray-300 rounded-lg p-1">
-                    </div>
                 </div>
-
-                <!-- 8. Error Correction Level Selector -->
-                <div>
-                    <label for="level-select" class="block text-sm font-medium text-gray-700 mb-1">Error Correction Level</label>
-                    <select id="level-select" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150">
-                        <option value="H" data-tolerance="30%">H (High - 30% Damage Tolerance)</option>
-                        <option value="Q" data-tolerance="25%">Q (Quartile - 25% Damage Tolerance)</option>
-                        <option value="M" data-tolerance="15%">M (Medium - 15% Damage Tolerance)</option>
-                        <option value="L" data-tolerance="7%">L (Low - 7% Damage Tolerance)</option>
-                    </select>
-                </div>
-                
-                <!-- 9. Generate Button -->
-                <button id="generate-button"
-                        class="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl shadow-md hover:bg-blue-700 transition duration-150 ease-in-out transform hover:scale-[1.01]">
-                    Generate QR Code
-                </button>
-            </div>
-
-            <!-- Preview and Download -->
-            <div class="flex flex-col items-center justify-start space-y-6 lg:border-l lg:pl-8">
-                <h2 class="text-2xl font-semibold text-gray-800 border-b pb-3 mb-4 w-full">Preview</h2>
-
-                <!-- QR Code Container -->
-                <div id="qr-container">
-                    <div id="qr-render"></div>
-                </div>
-
-                <!-- Download Button -->
-                <button id="download-button"
-                        class="w-full max-w-xs px-6 py-3 bg-green-500 text-white font-semibold rounded-xl shadow-md hover:bg-green-600 disabled:bg-gray-400 transition duration-150 ease-in-out">
-                    Download High-Res PNG
-                </button>
-
-                <!-- Status Message -->
-                <div id="status-message" class="text-sm text-gray-600 mt-4 h-5"></div>
-            </div>
-
-        </main>
-        
-        <!-- Footer Credit -->
-        <footer class="text-center mt-6 pb-4 text-sm text-gray-500">
-            Designed by <span class="font-semibold text-gray-700">Robinraj Premchand</span>
-        </footer>
+            </main>
+        </div>
     </div>
+    
+    <!-- Premium Footer -->
+    <footer class="py-12 border-t border-slate-100 bg-white/50 backdrop-blur-md">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <div class="flex items-center justify-center gap-4 mb-6">
+                <div class="h-px w-10 bg-slate-100"></div>
+                <span class="text-slate-400 text-[10px] font-black uppercase tracking-[0.4em]">Created and Designed by Robinraj Premchand</span>
+                <div class="h-px w-10 bg-slate-100"></div>
+            </div>
+            
+            <a href="https://instagram.com/i.am.mr.rob" target="_blank" class="group inline-flex items-center gap-3 transition-all">
+                <span class="text-slate-500 font-bold text-xs">Portfolio Access</span>
+                <div class="px-5 py-2.5 bg-slate-900 text-white rounded-full text-[10px] font-black tracking-widest group-hover:bg-blue-600 transition-all shadow-lg shadow-slate-900/10">@i.am.mr.rob</div>
+            </a>
+            
+            <p class="text-slate-300 text-[8px] font-bold uppercase tracking-[0.2em] mt-10">© 2026 Robin Studio • Pro-Print Version</p>
+        </div>
+    </footer>
 
     <!-- qr-code-styling library -->
     <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
@@ -197,21 +297,25 @@
         const removeLogoBtn = document.getElementById('remove-logo');
         const colorDarkInput = document.getElementById('color-dark');
         const colorLightInput = document.getElementById('color-light');
+        const resetColorDark = document.getElementById('reset-color-dark');
+        const resetColorLight = document.getElementById('reset-color-light');
         const generateButton = document.getElementById('generate-button');
         const downloadButton = document.getElementById('download-button');
         const qrRenderContainer = document.getElementById('qr-render');
         const statusMessage = document.getElementById('status-message');
-        const fileNameDisplay = document.getElementById('file-name');
         
         const levelSelect = document.getElementById('level-select');
         const logoSizeInput = document.getElementById('logo-size');
-        const logoStyleInputs = document.querySelectorAll('input[name="logo-style"]');
-        const qrStyleInputs = document.querySelectorAll('input[name="qr-style"]');
+        const logoSizeVal = document.getElementById('logo-size-val');
+        const logoSizeSlider = document.getElementById('logo-size-slider');
+        const colorDarkVal = document.getElementById('color-dark-val');
+        const colorLightVal = document.getElementById('color-light-val');
 
         let qrCode = null; 
         let currentLogoDataURL = null;
         
         const PREVIEW_SIZE = 300;
+        const MASTER_EXPORT_SIZE = 3000; // Restored to ultra-high resolution
 
         const createSvgDataUrl = (svgContent) => {
             const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">${svgContent}</svg>`;
@@ -219,7 +323,7 @@
         };
 
         const LOGO_SVGS = {
-            'whatsapp': createSvgDataUrl('<path fill="#4FCE5D" d="M12 0a12 12 0 0 0-9.6 19.3L1 23l4-1.2A11.9 11.9 0 0 0 12 24h.1a12 12 0 0 0 12-12 12 12 0 0 0-12-12zm6.6 14.1c-.2.5-.5.7-.9.8-.3.1-.9.2-1.4-.2-.5-.4-1.6-1-1.9-1-.3 0-.6 0-.8.2-.2.2-.8.8-.9.9s-.4.2-.7.2c-.3 0-.9-.3-1.6-.9-.6-.6-1.1-1.4-1.5-2.2-.4-.8-.1-1.3 0-1.4.1-.1.2-.3.3-.4.1-.1.2-.2.3-.4.1-.2 0-.4 0-.5 0-.1-.4-.8-.6-1-.2-.2-.5-.1-.7-.1-.2 0-.4 0-.6 0c-.2 0-.6.1-.9.5-.3.4-1.1 1.1-1.1 2.7 0 1.6 1.1 3.1 1.2 3.2.1.2 2.1 3.5 5.3 4.8 3.3 1.2 3.3 1.2 3.9 1.2.6 0 1.9-.7 2.2-1.5.3-.9.3-1.5.2-1.7-.1-.2-.3-.3-.6-.4z"/>'),
+            'whatsapp': createSvgDataUrl('<path fill="#4FCE5D" d="M12 0a12 12 0 0 0-9.6 19.3L1 23l4-1.2A11.9 11.9 0 0 0 12 24h.1a12 12 0 0 0 12-12 12 12 0 0 0-12-12zm6.6 14.1c-.2.5-.5.7-.9.8-.3.1-.9.2-1.4-.2-.5-.4-1.6-1-1.9-1-.3 0-.6 0-.8.2-.2.2-.8.8-.9.9s-.4.2-.7.2c-.3 0-.9-.3-1.6-.9-.6-.6-1.1-1.4-1.5-2.2-.4-.8-.1-1.3 0-1.4.1-.1.2-.3.3-.4.1-.1.2-.3.3-.4.1-.2 0-.4 0-.5 0-.1-.4-.8-.6-1-.2-.2-.5-.1-.7-.1-.2 0-.4 0-.6 0c-.2 0-.6.1-.9.5-.3.4-1.1 1.1-1.1 2.7 0 1.6 1.1 3.1 1.2 3.2.1.2 2.1 3.5 5.3 4.8 3.3 1.2 3.3 1.2 3.9 1.2.6 0 1.9-.7 2.2-1.5.3-.9.3-1.5.2-1.7-.1-.2-.3-.3-.6-.4z"/>'),
             'instagram': createSvgDataUrl('<rect width="24" height="24" rx="6" fill="#D62976"/><circle cx="12" cy="12" r="4.5" fill="none" stroke="white" stroke-width="2.5"/><circle cx="12" cy="12" r="2.5" fill="white"/><circle cx="18" cy="6" r="1.5" fill="white"/>'),
             'facebook': createSvgDataUrl('<rect width="24" height="24" rx="4" fill="#3B5998"/><path fill="white" d="M14 10h3l-1 5h-2v9h-5v-9H6v-5h3V8c0-1.7 1-3 3-3h3v5z"/>'),
             'youtube': createSvgDataUrl('<rect width="24" height="24" rx="4" fill="#FF0000"/><path fill="white" d="M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM9.5 16.5l6-4.5-6-4.5v9z"/>'),
@@ -227,43 +331,33 @@
             'website': createSvgDataUrl('<circle cx="12" cy="12" r="10" fill="none" stroke="#4B5563" stroke-width="2"/><ellipse cx="12" cy="12" rx="10" ry="4" fill="none" stroke="#4B5563" stroke-width="2"/><path fill="none" stroke="#4B5563" stroke-width="2" d="M2 12h20M12 2v20"/>')
         };
 
-        // --- Helper: Apply Shape to Logo ---
         async function getStyledLogo(base64, shape, bgColor) {
             if (shape === 'none' || !base64) return base64;
-
             return new Promise((resolve) => {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 const img = new Image();
-
                 img.onload = () => {
-                    const size = 512; // High-res internal processing
+                    const size = 1024;
                     canvas.width = size;
                     canvas.height = size;
-
-                    // 1. Draw Background Shape
                     ctx.fillStyle = bgColor;
                     if (shape === 'circle') {
                         ctx.beginPath();
                         ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
                         ctx.fill();
                     } else if (shape === 'rounded') {
-                        const radius = 80;
+                        const radius = 160;
                         ctx.beginPath();
                         ctx.roundRect(0, 0, size, size, radius);
                         ctx.fill();
                     }
-
-                    // 2. Draw Logo (centered with padding)
                     const padding = size * 0.15;
                     const drawSize = size - (padding * 2);
-                    
-                    // Maintain aspect ratio
                     const ratio = img.width / img.height;
                     let w = drawSize, h = drawSize;
                     if (ratio > 1) h = drawSize / ratio;
                     else w = drawSize * ratio;
-
                     ctx.drawImage(img, (size-w)/2, (size-h)/2, w, h);
                     resolve(canvas.toDataURL('image/png'));
                 };
@@ -272,140 +366,141 @@
         }
 
         async function generateQRCode() {
-            const qrStyle = document.querySelector('input[name="qr-style"]:checked').value;
-            const logoBg = document.querySelector('input[name="logo-style"]:checked').value;
+            statusMessage.textContent = 'Syncing...';
+            const qrStyleElement = document.querySelector('input[name="qr-style"]:checked');
+            const qrStyle = qrStyleElement ? qrStyleElement.value : 'square';
+            const logoStyleElement = document.querySelector('input[name="logo-style"]:checked');
+            const logoBg = logoStyleElement ? logoStyleElement.value : 'rounded';
             const sizeFactor = parseInt(logoSizeInput.value, 10) / 100;
             const bgColor = colorLightInput.value;
             const dotColor = colorDarkInput.value;
 
             qrRenderContainer.innerHTML = '';
-            
-            // Apply requested shape to the logo data
             const finalLogo = await getStyledLogo(currentLogoDataURL, logoBg, bgColor);
-
             const cornerType = qrStyle === 'dots' ? 'dot' : (qrStyle === 'rounded' ? 'extra-rounded' : 'square');
 
             const options = {
                 width: PREVIEW_SIZE,
                 height: PREVIEW_SIZE,
+                margin: 20,
                 type: "canvas",
                 data: urlInput.value || "https://www.google.com",
                 image: finalLogo,
-                dotsOptions: {
-                    color: dotColor,
-                    type: qrStyle === 'rounded' ? 'rounded' : (qrStyle === 'dots' ? 'dots' : 'square')
-                },
-                backgroundOptions: {
-                    color: bgColor,
-                },
-                imageOptions: {
-                    crossOrigin: "anonymous",
-                    margin: logoBg === 'none' ? 0 : 4,
-                    imageSize: sizeFactor,
-                    hideBackgroundDots: true
-                },
-                qrOptions: {
-                    errorCorrectionLevel: levelSelect.value
-                },
-                cornersSquareOptions: {
-                    type: cornerType,
-                    color: dotColor
-                },
-                cornersDotOptions: {
-                    type: cornerType === 'dot' ? 'dot' : 'square',
-                    color: dotColor
-                }
+                dotsOptions: { color: dotColor, type: qrStyle === 'rounded' ? 'rounded' : (qrStyle === 'dots' ? 'dots' : 'square') },
+                backgroundOptions: { color: bgColor },
+                imageOptions: { margin: logoBg === 'none' ? 0 : 4, imageSize: sizeFactor, hideBackgroundDots: true },
+                qrOptions: { errorCorrectionLevel: levelSelect.value },
+                cornersSquareOptions: { type: cornerType, color: dotColor },
+                cornersDotOptions: { type: cornerType === 'dot' ? 'dot' : 'square', color: dotColor }
             };
 
             qrCode = new QRCodeStyling(options);
             qrCode.append(qrRenderContainer);
-            statusMessage.textContent = 'QR Code generated!';
+            setTimeout(() => { statusMessage.textContent = 'Preview Synced'; }, 400);
         }
 
         function renderLogoSelectionGrid() {
             const container = document.getElementById('logo-selection-grid');
             const clearButton = document.getElementById('clear-predefined-logo');
             container.innerHTML = '';
-            
             Object.keys(LOGO_SVGS).forEach(key => {
                 const dataUrl = LOGO_SVGS[key];
                 const div = document.createElement('div');
-                div.className = 'flex flex-col items-center p-2 rounded-lg cursor-pointer hover:bg-white transition duration-150 border-2 border-transparent';
-                
+                div.className = 'logo-option p-2 bg-white rounded-xl cursor-pointer border border-slate-100 shadow-sm transition-all';
                 const img = document.createElement('img');
                 img.src = dataUrl;
-                img.className = 'w-8 h-8 pointer-events-none';
-
-                const span = document.createElement('span');
-                span.className = 'text-[10px] text-gray-700 mt-1 capitalize pointer-events-none';
-                span.textContent = key.replace('-', ' ');
-
+                img.className = 'w-7 h-7 pointer-events-none';
                 div.appendChild(img);
-                div.appendChild(span);
                 container.appendChild(div);
-
                 div.addEventListener('click', () => {
                     currentLogoDataURL = dataUrl;
                     logoUpload.value = '';
-                    fileNameDisplay.textContent = `Pre-defined: ${key}`;
                     removeLogoBtn.classList.remove('hidden');
                     clearButton.classList.remove('hidden');
-                    document.querySelectorAll('#logo-selection-grid > div').forEach(d => d.classList.remove('border-blue-500', 'bg-white'));
-                    div.classList.add('border-blue-500', 'bg-white');
+                    document.querySelectorAll('#logo-selection-grid > div').forEach(d => d.classList.remove('ring-4', 'ring-blue-500/10', 'border-blue-400'));
+                    div.classList.add('ring-4', 'ring-blue-500/10', 'border-blue-400');
                     generateQRCode();
                 });
             });
-            
             clearButton.addEventListener('click', removeLogo);
         }
 
         function removeLogo() {
             currentLogoDataURL = null;
             logoUpload.value = '';
-            fileNameDisplay.textContent = 'No file selected.';
             removeLogoBtn.classList.add('hidden');
             document.getElementById('clear-predefined-logo').classList.add('hidden');
-            document.querySelectorAll('#logo-selection-grid > div').forEach(d => d.classList.remove('border-blue-500', 'bg-white'));
+            document.querySelectorAll('#logo-selection-grid > div').forEach(d => d.classList.remove('ring-4', 'ring-blue-500/10', 'border-blue-400'));
             generateQRCode();
         }
 
-        async function downloadQRCode() {
-            if (!qrCode) return;
-            const urlValue = urlInput.value.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\//g, '_').substring(0, 20);
-            
-            // High-res export requires updating the instance temporarily
-            qrCode.download({
-                name: `QR-${urlValue || 'code'}`,
-                extension: "png"
-            });
-        }
-        
         logoUpload.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     currentLogoDataURL = event.target.result;
-                    fileNameDisplay.textContent = file.name;
                     removeLogoBtn.classList.remove('hidden');
-                    document.querySelectorAll('#logo-selection-grid > div').forEach(d => d.classList.remove('border-blue-500', 'bg-white'));
+                    document.querySelectorAll('#logo-selection-grid > div').forEach(d => d.classList.remove('ring-4', 'ring-blue-500/10', 'border-blue-400'));
                     generateQRCode();
                 };
                 reader.readAsDataURL(file);
             }
         });
 
+        logoSizeSlider.addEventListener('input', () => { 
+            logoSizeInput.value = logoSizeSlider.value; 
+            logoSizeVal.textContent = logoSizeSlider.value;
+            generateQRCode(); 
+        });
+
+        colorDarkInput.addEventListener('input', () => { 
+            colorDarkVal.textContent = colorDarkInput.value.toUpperCase(); 
+            generateQRCode(); 
+        });
+        
+        colorLightInput.addEventListener('input', () => { 
+            colorLightVal.textContent = colorLightInput.value.toUpperCase(); 
+            generateQRCode(); 
+        });
+
+        resetColorDark.addEventListener('click', () => {
+            colorDarkInput.value = "#000000";
+            colorDarkVal.textContent = "#000000";
+            generateQRCode();
+        });
+
+        resetColorLight.addEventListener('click', () => {
+            colorLightInput.value = "#FFFFFF";
+            colorLightVal.textContent = "#FFFFFF";
+            generateQRCode();
+        });
+
         window.onload = () => {
             renderLogoSelectionGrid();
             generateQRCode(); 
             generateButton.addEventListener('click', generateQRCode);
-            downloadButton.addEventListener('click', downloadQRCode);
+            downloadButton.addEventListener('click', () => {
+                statusMessage.textContent = 'Generating 3000px Master...';
+                // Trigger a high-res re-render before downloading
+                qrCode.update({
+                    width: MASTER_EXPORT_SIZE,
+                    height: MASTER_EXPORT_SIZE
+                });
+                qrCode.download({ 
+                    name: "RobinStudio_Master_3000px", 
+                    extension: "png"
+                }).then(() => {
+                    // Revert UI preview back to small size
+                    qrCode.update({
+                        width: PREVIEW_SIZE,
+                        height: PREVIEW_SIZE
+                    });
+                    statusMessage.textContent = 'Master Exported Successfully';
+                });
+            });
             urlInput.addEventListener('input', generateQRCode);
-            colorDarkInput.addEventListener('input', generateQRCode);
-            colorLightInput.addEventListener('input', generateQRCode);
-            logoSizeInput.addEventListener('input', generateQRCode);
-            logoStyleInputs.forEach(input => input.addEventListener('change', generateQRCode));
-            qrStyleInputs.forEach(input => input.addEventListener('change', generateQRCode));
+            document.querySelectorAll('input[type=radio]').forEach(r => r.addEventListener('change', generateQRCode));
             levelSelect.addEventListener('change', generateQRCode);
         };
     </script>
